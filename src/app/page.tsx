@@ -1,33 +1,18 @@
+import Scene from "@/components/canvas/Scene";
+import Overlay from "@/components/ui/Overlay";
+
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start text-center sm:text-left">
-        <h1 className="text-4xl sm:text-6xl font-bold tracking-tight">
-          Portfolio
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-lg">
-          Welcome to my portfolio. This project is built with Next.js 15,
-          Tailwind CSS 4, and TypeScript.
-        </p>
+    <div className="relative w-full h-screen overflow-hidden bg-black">
+      {/* 3D Scene Layer - z-0 */}
+      <div className="absolute inset-0 z-0">
+        <Scene />
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="#"
-          >
-            Check my Work
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="#"
-          >
-            Contact Me
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-sm text-gray-500">
-        <p>&copy; {new Date().getFullYear()} Portfolio. All rights reserved.</p>
-      </footer>
+      {/* UI Overlay Layer - z-10 */}
+      <div className="relative z-10 h-full w-full pointer-events-none">
+        <Overlay />
+      </div>
     </div>
   );
 }

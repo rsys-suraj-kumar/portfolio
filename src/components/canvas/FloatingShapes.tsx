@@ -84,20 +84,24 @@ function Stars() {
 
   return (
     <group ref={ref} rotation={[0, 0, Math.PI / 4]}>
-      {Array.from({ length: 50 }).map((_, i) => (
-        <mesh
-          key={i}
-          position={[
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20 - 5,
-          ]}
-          scale={0.05}
-        >
-          <sphereGeometry args={[1, 8, 8]} />
-          <meshBasicMaterial color="white" />
-        </mesh>
-      ))}
+      {Array.from({ length: 50 }).map((_, i) => {
+        const randomNo = Math.random();
+
+        return (
+          <mesh
+            key={i}
+            position={[
+              (randomNo - 0.5) * 20,
+              (randomNo - 0.5) * 20,
+              (randomNo - 0.5) * 20 - 5,
+            ]}
+            scale={0.05}
+          >
+            <sphereGeometry args={[1, 8, 8]} />
+            <meshBasicMaterial color="white" />
+          </mesh>
+        );
+      })}
     </group>
   );
 }

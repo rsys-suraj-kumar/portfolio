@@ -13,7 +13,7 @@ export default function Overlay() {
         transition={{ duration: 0.8 }}
         className="flex justify-between items-center z-10 pointer-events-auto"
       >
-        <div className="text-xl font-bold tracking-tighter">PORTFOLIO</div>
+        <div className="text-xl font-bold tracking-tighter">SURAJ KUMAR</div>
         <nav className="hidden sm:flex gap-6 text-sm font-medium">
           <a href="#" className="hover:text-gray-400 transition-colors">
             Work
@@ -80,7 +80,7 @@ export default function Overlay() {
         </div>
 
         <div className="text-xs text-gray-500 text-right">
-          <p>© {new Date().getFullYear()} Portfolio.</p>
+          <p>© {new Date().getFullYear()} Suraj Kumar.</p>
           <p>Made with Next.js & R3F.</p>
         </div>
       </motion.footer>

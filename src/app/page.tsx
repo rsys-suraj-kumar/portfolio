@@ -1,18 +1,22 @@
-import Scene from "@/components/canvas/Scene";
+"use client";
+
+import dynamic from "next/dynamic";
 import Overlay from "@/components/ui/Overlay";
+
+const Scene = dynamic(() => import("@/components/canvas/Scene"), {
+  ssr: false,
+});
 
 export default function Home() {
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* 3D Scene Layer - z-0 */}
-      <div className="absolute inset-0 z-0">
+    <main className="relative w-full min-h-screen bg-black text-white overflow-x-hidden">
+      {/* 3D Scene Background - Fixed */}
+      <div className="fixed inset-0 z-0">
         <Scene />
       </div>
 
-      {/* UI Overlay Layer - z-10 */}
-      <div className="relative z-10 h-full w-full pointer-events-none">
-        <Overlay />
-      </div>
-    </div>
+      {/* Content Overlay - Scrollable */}
+      <Overlay />
+    </main>
   );
 }

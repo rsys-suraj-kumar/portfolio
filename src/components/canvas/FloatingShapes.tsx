@@ -72,6 +72,18 @@ export default function FloatingShapes() {
   );
 }
 
+// Pre-generate star positions to avoid Math.random in render
+const STAR_POSITIONS = Array.from({ length: 50 }, (_, i) => {
+  // Use deterministic seed based on index for consistent positions
+  const seed = (i * 9301 + 49297) % 233280;
+  const random = seed / 233280;
+  return {
+    x: (random - 0.5) * 20,
+    y: (((seed * 2) % 233280) / 233280 - 0.5) * 20,
+    z: (((seed * 3) % 233280) / 233280 - 0.5) * 20 - 5,
+  };
+});
+
 function Stars() {
   const ref = useRef<THREE.Group>(null);
 
@@ -84,24 +96,12 @@ function Stars() {
 
   return (
     <group ref={ref} rotation={[0, 0, Math.PI / 4]}>
-      {Array.from({ length: 50 }).map((_, i) => {
-        const randomNo = Math.random();
-
-        return (
-          <mesh
-            key={i}
-            position={[
-              (randomNo - 0.5) * 20,
-              (randomNo - 0.5) * 20,
-              (randomNo - 0.5) * 20 - 5,
-            ]}
-            scale={0.05}
-          >
-            <sphereGeometry args={[1, 8, 8]} />
-            <meshBasicMaterial color="white" />
-          </mesh>
-        );
-      })}
+      {STAR_POSITIONS.map((pos, i) => (
+        <mesh key={i} position={[pos.x, pos.y, pos.z]} scale={0.05}>
+          <sphereGeometry args={[1, 8, 8]} />
+          <meshBasicMaterial color="white" />
+        </mesh>
+      ))}
     </group>
   );
 }

@@ -7,7 +7,6 @@ export default function CustomCursor() {
   const { setCursorPosition } = useAppStore();
   const cursorRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
-  const trailRef = useRef<HTMLDivElement[]>([]);
   const isHoveringRef = useRef(false);
 
   useEffect(() => {
@@ -15,6 +14,14 @@ export default function CustomCursor() {
     let mouseY = 0;
     let cursorX = 0;
     let cursorY = 0;
+
+    // Check for touch support
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    if (isTouch) {
+      if (cursorRef.current) cursorRef.current.style.display = "none";
+      if (cursorDotRef.current) cursorDotRef.current.style.display = "none";
+      return;
+    }
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX;

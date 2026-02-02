@@ -1,7 +1,7 @@
 "use client";
 
-import { Github, Linkedin, Mail, Phone, ArrowUpRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Github, Linkedin, Mail, ArrowUpRight } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { useAppStore, ERAS } from "@/stores/useAppStore";
 
 // Timeline Section Component
@@ -51,8 +51,7 @@ function TimelineSection({
 }
 
 export default function Overlay() {
-  const { scrollProgress, setScrollProgress, isLoading, currentEra } =
-    useAppStore();
+  const { scrollProgress, setScrollProgress, isLoading } = useAppStore();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Scroll handling
@@ -73,20 +72,26 @@ export default function Overlay() {
     <div ref={containerRef} className="relative z-10 pointer-events-none">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 flex justify-between items-center px-8 py-6 z-50 pointer-events-auto">
-        <div className="text-lg font-bold tracking-tight glitch" data-text="SK">
-          SK
+        <div className="text-xl font-bold tracking-tight font-display">
+          SK<span className="text-cyan-400">.</span>
         </div>
 
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-12">
           {/* Era progress */}
-          <div className="hidden md:flex items-center gap-2">
-            {ERAS.map((era, i) => (
+          <div className="hidden md:flex items-center gap-4">
+            {ERAS.map((era) => (
               <div
                 key={era.year}
-                className="w-8 h-0.5 rounded-full transition-all duration-300"
+                className="w-12 h-1 rounded-full transition-all duration-500"
                 style={{
                   backgroundColor:
-                    scrollProgress >= era.position ? era.color : "#333",
+                    scrollProgress >= era.position
+                      ? era.color
+                      : "rgba(255,255,255,0.05)",
+                  boxShadow:
+                    scrollProgress >= era.position
+                      ? `0 0 10px ${era.color}`
+                      : "none",
                 }}
               />
             ))}
@@ -94,7 +99,7 @@ export default function Overlay() {
 
           <a
             href="#contact"
-            className="text-sm hover:text-cyan-400 transition-colors"
+            className="text-sm font-medium hover:text-cyan-400 transition-colors tracking-widest uppercase"
           >
             Contact
           </a>
@@ -103,26 +108,29 @@ export default function Overlay() {
 
       {/* Hero Section */}
       <section className="min-h-screen flex items-center justify-center relative">
+        {/* Subtle Backdrop for readability */}
+        <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/60 pointer-events-none" />
+
         <div
-          className="text-center max-w-4xl px-8 pointer-events-auto"
+          className="text-center max-w-5xl px-8 pointer-events-auto relative z-10"
           style={{
-            transform: `translateY(${scrollProgress * 100}px)`,
-            opacity: Math.max(0, 1 - scrollProgress * 5),
+            transform: `translateY(${scrollProgress * 50}px)`,
+            opacity: Math.max(0, 1 - scrollProgress * 4),
           }}
         >
-          <div className="overflow-hidden mb-6">
-            <div
-              className="inline-block px-4 py-2 text-xs font-semibold tracking-[0.4em] uppercase border border-white/20 rounded-full"
+          <div className="overflow-hidden mb-8">
+            <span
+              className="inline-block px-6 py-2 text-xs font-bold tracking-[0.5em] uppercase border border-white/10 rounded-full bg-white/5"
               style={{
                 animation: "slideUp 0.8s ease forwards 0.3s",
                 opacity: 0,
               }}
             >
-              Scroll to travel through time
-            </div>
+              The Architecture of Time
+            </span>
           </div>
 
-          <h1 className="text-7xl md:text-9xl font-bold tracking-tighter mb-6">
+          <h1 className="text-8xl md:text-10xl font-bold tracking-tighter mb-8 font-display">
             <span className="block overflow-hidden">
               <span
                 className="block animate-slide-up"
@@ -142,119 +150,172 @@ export default function Overlay() {
           </h1>
 
           <p
-            className="text-gray-400 text-lg md:text-xl max-w-xl mx-auto animate-fade-in"
+            className="text-gray-400 text-xl md:text-2xl max-w-2xl mx-auto animate-fade-in leading-relaxed"
             style={{ animationDelay: "1s" }}
           >
-            Senior Software Engineer crafting digital experiences
+            Senior Software Engineer crafting{" "}
+            <span className="text-white">high-performance</span> digital
+            products and creative experiences.
           </p>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
-          <div className="w-px h-20 bg-gradient-to-b from-white/50 to-transparent animate-pulse" />
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-50">
+          <span className="text-[10px] tracking-[0.4em] uppercase font-bold text-gray-500">
+            Scroll
+          </span>
+          <div className="w-px h-16 bg-linear-to-b from-white to-transparent" />
         </div>
       </section>
 
       {/* 2018 - The Beginning */}
-      <TimelineSection era={ERAS[0]} className="px-8 md:px-20">
-        <div className="max-w-2xl ml-20 md:ml-32 pointer-events-auto">
-          <span className="text-8xl font-bold opacity-10 absolute -top-10 left-20">
+      <TimelineSection era={ERAS[0]} className="px-8 md:px-32">
+        <div className="max-w-3xl relative z-10 pointer-events-auto">
+          {/* Content Backdrop */}
+          <div className="absolute -inset-12 bg-black/40 blur-3xl -z-10 rounded-full" />
+
+          <span className="text-9xl font-bold opacity-5 absolute -top-20 -left-10 font-display">
             2018
           </span>
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">The Beginning</h2>
-          <p className="text-gray-400 text-lg leading-relaxed mb-8">
-            Started my journey into software engineering. Learning the
-            fundamentals, building my first applications, and discovering the
-            power of web technologies.
+          <p
+            className="text-sm font-bold tracking-[0.3em] uppercase mb-4"
+            style={{ color: ERAS[0].color }}
+          >
+            Chapter 01
           </p>
-          <div className="flex flex-wrap gap-3">
-            {["HTML", "CSS", "JavaScript", "React"].map((skill) => (
-              <span
-                key={skill}
-                className="px-3 py-1 text-sm border border-white/20 rounded-full"
-              >
-                {skill}
-              </span>
-            ))}
+          <h2 className="text-5xl md:text-7xl font-bold mb-8 font-display">
+            The Beginning
+          </h2>
+          <p className="text-gray-400 text-xl leading-relaxed mb-10 max-w-xl">
+            My journey began at the intersection of curiosity and code. While
+            studying Electrical Engineering, I discovered the infinite creative
+            potential of the web.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            {["React", "JavaScript", "Node.js", "Electrical Engineering"].map(
+              (skill) => (
+                <span
+                  key={skill}
+                  className="px-5 py-2 text-xs font-bold border border-white/10 rounded-full bg-white/5 uppercase tracking-widest text-gray-300"
+                >
+                  {skill}
+                </span>
+              ),
+            )}
           </div>
         </div>
       </TimelineSection>
 
+      <div className="h-[20vh]" />
+
       {/* 2022 - IJRDO */}
-      <TimelineSection era={ERAS[2]} className="px-8 md:px-20 items-end">
-        <div className="max-w-2xl mr-20 md:mr-32 text-right pointer-events-auto">
-          <span className="text-8xl font-bold opacity-10 absolute -top-10 right-20">
+      <TimelineSection era={ERAS[2]} className="px-8 md:px-32 items-end">
+        <div className="max-w-3xl text-right relative z-10 pointer-events-auto">
+          {/* Content Backdrop */}
+          <div className="absolute -inset-12 bg-black/40 blur-3xl -z-10 rounded-full" />
+
+          <span className="text-9xl font-bold opacity-5 absolute -top-20 -right-10 font-display">
             2022
           </span>
-          <h2 className="text-4xl md:text-6xl font-bold mb-4">IJRDO Journal</h2>
-          <p className="text-cyan-400 text-xl mb-6">Software Engineer</p>
-          <p className="text-gray-400 text-lg leading-relaxed mb-8">
-            Architected React and Next.js applications with scalable structures.
-            Led technical direction for front-end features and mentored junior
-            developers.
+          <p
+            className="text-sm font-bold tracking-[0.3em] uppercase mb-4"
+            style={{ color: ERAS[2].color }}
+          >
+            Chapter 02
+          </p>
+          <h2 className="text-5xl md:text-7xl font-bold mb-6 font-display">
+            IJRDO Journal
+          </h2>
+          <p className="text-cyan-400 text-xl mb-8 font-medium">
+            Software Engineer
+          </p>
+          <p className="text-gray-400 text-xl leading-relaxed mb-10 max-w-xl ml-auto">
+            Architected large-scale React and Next.js applications. Led
+            technical direction for front-end features and established modern
+            development standards.
           </p>
 
-          <ProjectCard
-            title="Research Dashboard"
-            description="Production-grade Next.js dashboard for managing Scopus articles"
-            tags={["Next.js", "SSR", "Dashboard"]}
-          />
+          <div className="flex justify-end">
+            <ProjectCard
+              title="Research Dashboard"
+              description="Production-grade Next.js dashboard for managing Scopus articles and academic workflows."
+              tags={["Next.js", "SSR", "Dashboard"]}
+              color={ERAS[2].color}
+            />
+          </div>
         </div>
       </TimelineSection>
 
+      <div className="h-[20vh]" />
+
       {/* 2023-Present - Radiansys */}
-      <TimelineSection era={ERAS[3]} className="px-8 md:px-20">
-        <div className="max-w-3xl ml-20 md:ml-32 pointer-events-auto">
-          <span className="text-8xl font-bold opacity-10 absolute -top-10 left-20">
+      <TimelineSection era={ERAS[3]} className="px-8 md:px-32">
+        <div className="max-w-4xl relative z-10 pointer-events-auto">
+          {/* Content Backdrop */}
+          <div className="absolute -inset-12 bg-black/40 blur-3xl -z-10 rounded-full" />
+
+          <span className="text-9xl font-bold opacity-5 absolute -top-20 -left-10 font-display">
             2023
           </span>
-          <h2 className="text-4xl md:text-6xl font-bold mb-4">
+          <p
+            className="text-sm font-bold tracking-[0.3em] uppercase mb-4"
+            style={{ color: ERAS[3].color }}
+          >
+            Chapter 03
+          </p>
+          <h2 className="text-5xl md:text-7xl font-bold mb-6 font-display">
             Radiansys Technologies
           </h2>
-          <p className="text-fuchsia-400 text-xl mb-6">
+          <p className="text-fuchsia-400 text-xl mb-8 font-medium">
             Senior Software Engineer
           </p>
-          <p className="text-gray-400 text-lg leading-relaxed mb-8">
-            Owning architecture-heavy features across large-scale React and
-            Next.js applications. Solving performance-sensitive problems
-            end-to-end.
+          <p className="text-gray-400 text-xl leading-relaxed mb-12 max-w-2xl">
+            Directing technical architecture for mission-critical features.
+            Solving high-complexity performance bottlenecks and building
+            resilient end-to-end systems.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <ProjectCard
               title="VFXAI Video Editor"
-              description="Frame-accurate timeline, Fabric.js integration, CRDT+OT collaboration"
+              description="Frame-accurate timeline, Fabric.js implementation, and real-time collaboration."
               tags={["React", "Fabric.js", "CRDT"]}
               color="#ff00ff"
             />
             <ProjectCard
               title="Simplr Chat"
-              description="Custom WebSocket client, message virtualization, real-time sync"
-              tags={["WebSocket", "React", "Virtualization"]}
+              description="Custom WebSocket client with message virtualization and real-time state sync."
+              tags={["WebSocket", "React", "Perf"]}
               color="#00ffff"
             />
             <ProjectCard
               title="Gitsy PWA"
-              description="WebAuthn biometrics, offline-first, service workers"
-              tags={["PWA", "WebAuthn", "Service Workers"]}
+              description="WebAuthn biometric authentication with offline-first service worker sync."
+              tags={["PWA", "Biometrics", "SW"]}
               color="#ffff00"
             />
           </div>
         </div>
       </TimelineSection>
 
-      {/* Present & Skills */}
+      <div className="h-[20vh]" />
+
+      {/* Tech Stack */}
       <TimelineSection
         era={ERAS[4]}
-        className="px-8 md:px-20 items-center justify-center"
+        className="px-8 md:px-32 items-center justify-center"
       >
-        <div className="max-w-4xl text-center pointer-events-auto">
-          <span className="text-8xl font-bold opacity-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            NOW
-          </span>
-          <h2 className="text-5xl md:text-7xl font-bold mb-12">Tech Stack</h2>
+        <div className="max-w-5xl text-center relative z-10 pointer-events-auto">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-cyan-400/5 blur-[120px] -z-10 rounded-full" />
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+          <span className="text-[12rem] font-bold opacity-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-display pointer-events-none">
+            STACK
+          </span>
+          <h2 className="text-5xl md:text-8xl font-bold mb-16 font-display tracking-tight">
+            Technical Arsenal
+          </h2>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
             <SkillCategory
               title="Core"
               skills={["TypeScript", "React", "Next.js"]}
@@ -267,7 +328,7 @@ export default function Overlay() {
             />
             <SkillCategory
               title="Styling"
-              skills={["Tailwind", "CSS Modules", "Styled"]}
+              skills={["Tailwind", "CSS Modules", "Framer"]}
               color="#ffff00"
             />
             <SkillCategory
@@ -277,58 +338,75 @@ export default function Overlay() {
             />
           </div>
 
-          {/* Education */}
-          <div className="inline-block p-8 border border-white/10 rounded-2xl text-left">
-            <h3 className="text-2xl font-bold mb-2">
-              B.Tech - Electrical Engineering
-            </h3>
-            <p className="text-cyan-400">Deenbandhu Chhotu Ram University</p>
-            <p className="text-gray-500 text-sm">2018 – 2022</p>
+          <div className="inline-flex flex-col md:flex-row items-center gap-8 p-10 border border-white/5 rounded-3xl bg-white/2">
+            <div className="text-left">
+              <h3 className="text-2xl font-bold mb-2 font-display uppercase tracking-wider">
+                B.Tech Electrical Engineering
+              </h3>
+              <p className="text-cyan-400 font-mono text-lg font-medium">
+                Deenbandhu Chhotu Ram University
+              </p>
+            </div>
+            <div className="h-px w-12 bg-white/10 hidden md:block" />
+            <div className="text-gray-500 font-mono text-lg uppercase tracking-widest whitespace-nowrap">
+              2018 — 2022
+            </div>
           </div>
         </div>
       </TimelineSection>
 
+      <div className="h-[20vh]" />
+
       {/* Future - Contact */}
       <TimelineSection
         era={ERAS[5]}
-        className="px-8 md:px-20 items-center justify-center"
+        className="px-8 md:px-32 items-center justify-center"
         id="contact"
       >
-        <div className="max-w-3xl text-center pointer-events-auto">
-          <span className="text-6xl md:text-8xl font-bold opacity-5 absolute top-1/4 left-1/2 -translate-x-1/2">
-            FUTURE
+        <div className="max-w-4xl text-center relative z-10 pointer-events-auto">
+          {/* Subtle glow behind contact */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-400/10 blur-[100px] -z-10 rounded-full" />
+
+          <span className="text-xl font-bold tracking-[0.5em] uppercase text-gray-500 mb-8 block font-mono">
+            The Next Era
           </span>
 
-          <h2 className="text-5xl md:text-8xl font-bold mb-8 tracking-tighter">
-            <span className="block">What&apos;s</span>
-            <span className="block gradient-text">Next?</span>
+          <h2 className="text-6xl md:text-9xl font-bold mb-12 tracking-tighter font-display">
+            <span className="block italic opacity-40">Ready to</span>
+            <span className="block gradient-text">Collaborate?</span>
           </h2>
 
-          <p className="text-xl text-gray-400 mb-12 max-w-xl mx-auto">
-            The future is unwritten. Let&apos;s build something amazing
-            together.
+          <p className="text-xl md:text-2xl text-gray-400 mb-16 max-w-2xl mx-auto leading-relaxed">
+            I&apos;m always looking for ambitious projects and bold ideas. If
+            you have one, let&apos;s talk.
           </p>
 
           <a
             href="mailto:suraj17054209@gmail.com"
-            className="group inline-flex items-center gap-4 text-2xl md:text-4xl font-bold hover:text-cyan-400 transition-colors hover-target"
+            className="group relative inline-flex items-center gap-6 text-3xl md:text-5xl font-bold transition-all hover-target"
           >
-            suraj17054209@gmail.com
-            <ArrowUpRight className="w-8 h-8 group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform" />
+            <span className="relative z-10">suraj17054209@gmail.com</span>
+            <ArrowUpRight className="w-10 h-10 group-hover:translate-x-4 group-hover:-translate-y-4 transition-transform text-cyan-400" />
+            <div className="absolute -bottom-2 left-0 w-0 h-1 bg-cyan-400 transition-all duration-500 group-hover:w-full" />
           </a>
 
-          <div className="flex justify-center gap-6 mt-16">
+          <div className="flex justify-center gap-10 mt-24">
             <SocialLink
               href="https://github.com/surajkumar85"
-              icon={<Github />}
+              icon={<Github className="w-6 h-6" />}
             />
-            <SocialLink href="https://linkedin.com" icon={<Linkedin />} />
-            <SocialLink href="mailto:suraj17054209@gmail.com" icon={<Mail />} />
-            <SocialLink href="tel:+919306385785" icon={<Phone />} />
+            <SocialLink
+              href="https://linkedin.com"
+              icon={<Linkedin className="w-6 h-6" />}
+            />
+            <SocialLink
+              href="mailto:suraj17054209@gmail.com"
+              icon={<Mail className="w-6 h-6" />}
+            />
           </div>
 
-          <p className="text-gray-700 mt-24 text-sm tracking-[0.2em] uppercase">
-            © {new Date().getFullYear()} Suraj Kumar
+          <p className="text-gray-600 mt-32 text-xs tracking-[0.4em] uppercase font-bold">
+            © {new Date().getFullYear()} DESIGNED & DEVELOPED BY SURAJ KUMAR
           </p>
         </div>
       </TimelineSection>

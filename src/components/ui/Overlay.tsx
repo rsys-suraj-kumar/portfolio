@@ -1,521 +1,340 @@
 "use client";
 
-import {
-  Github,
-  Linkedin,
-  Mail,
-  Phone,
-  ExternalLink,
-  ArrowDown,
-  ArrowUpRight,
-} from "lucide-react";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { Github, Linkedin, Mail, Phone, ArrowUpRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useAppStore, ERAS } from "@/stores/useAppStore";
+
+// Timeline Section Component
+function TimelineSection({
+  era,
+  children,
+  className = "",
+  id,
+}: {
+  era: (typeof ERAS)[0];
+  children: React.ReactNode;
+  className?: string;
+  id?: string;
+}) {
+  const { currentEra } = useAppStore();
+  const isActive = currentEra?.year === era.year;
+
+  return (
+    <section
+      id={id || `era-${era.year}`}
+      className={`min-h-screen relative flex items-center ${className}`}
+      style={{
+        opacity: isActive ? 1 : 0.3,
+        transition: "opacity 0.5s ease",
+      }}
+    >
+      {/* Era indicator */}
+      <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden md:flex flex-col items-center gap-4">
+        <div
+          className="w-3 h-3 rounded-full transition-all duration-500"
+          style={{
+            backgroundColor: era.color,
+            boxShadow: isActive ? `0 0 20px ${era.color}` : "none",
+          }}
+        />
+        <span
+          className="text-xs tracking-[0.3em] uppercase origin-center -rotate-90 whitespace-nowrap transition-colors duration-500"
+          style={{ color: isActive ? era.color : "#666" }}
+        >
+          {era.year}
+        </span>
+      </div>
+
+      {children}
+    </section>
+  );
+}
 
 export default function Overlay() {
-  const [scrollY, setScrollY] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const cursorDotRef = useRef<HTMLDivElement>(null);
-
-  // Loading animation
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 1500);
-    return () => clearTimeout(timer);
-  }, []);
+  const { scrollProgress, setScrollProgress, isLoading, currentEra } =
+    useAppStore();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Scroll handling
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY);
-      const progress =
-        window.scrollY / (document.body.scrollHeight - window.innerHeight);
-      setScrollProgress(progress);
+      const scrollHeight = document.body.scrollHeight - window.innerHeight;
+      const progress = window.scrollY / scrollHeight;
+      setScrollProgress(Math.min(1, Math.max(0, progress)));
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [setScrollProgress]);
 
-  // Custom cursor
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setCursorPos({ x: e.clientX, y: e.clientY });
-
-      if (cursorRef.current) {
-        cursorRef.current.style.left = `${e.clientX}px`;
-        cursorRef.current.style.top = `${e.clientY}px`;
-      }
-      if (cursorDotRef.current) {
-        cursorDotRef.current.style.left = `${e.clientX}px`;
-        cursorDotRef.current.style.top = `${e.clientY}px`;
-      }
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  // Hover detection for interactive elements
-  useEffect(() => {
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === "A" ||
-        target.tagName === "BUTTON" ||
-        target.closest(".hover-target")
-      ) {
-        setIsHovering(true);
-      }
-    };
-    const handleMouseOut = () => setIsHovering(false);
-
-    document.addEventListener("mouseover", handleMouseOver);
-    document.addEventListener("mouseout", handleMouseOut);
-    return () => {
-      document.removeEventListener("mouseover", handleMouseOver);
-      document.removeEventListener("mouseout", handleMouseOut);
-    };
-  }, []);
+  if (isLoading) return null;
 
   return (
-    <>
-      {/* Loading Screen */}
-      <div className={`loading-screen ${isLoaded ? "hidden" : ""}`}>
-        <div className="loader" />
-      </div>
+    <div ref={containerRef} className="relative z-10 pointer-events-none">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 flex justify-between items-center px-8 py-6 z-50 pointer-events-auto">
+        <div className="text-lg font-bold tracking-tight glitch" data-text="SK">
+          SK
+        </div>
 
-      {/* Custom Cursor */}
-      <div
-        ref={cursorRef}
-        className={`custom-cursor ${isHovering ? "hovering" : ""}`}
-        style={{ transform: "translate(-50%, -50%)" }}
-      />
-      <div
-        ref={cursorDotRef}
-        className="cursor-dot"
-        style={{ transform: "translate(-50%, -50%)" }}
-      />
-
-      {/* Scroll Progress Indicator */}
-      <div
-        className="scroll-indicator"
-        style={{ transform: `scaleX(${scrollProgress})` }}
-      />
-
-      {/* Noise Overlay */}
-      <div className="noise-overlay" />
-
-      <div className="relative z-10">
-        {/* Fixed Header */}
-        <header className="fixed top-0 left-0 right-0 flex justify-between items-center px-8 py-6 z-50 mix-blend-difference">
-          <div
-            className="glitch text-xl font-bold tracking-tight"
-            data-text="SURAJ KUMAR"
-          >
-            SURAJ KUMAR
-          </div>
-          <nav className="hidden md:flex gap-8 text-sm font-medium uppercase tracking-wider">
-            <a
-              href="#experience"
-              className="hover:text-cyan-400 transition-all duration-300 hover-target"
-            >
-              Experience
-            </a>
-            <a
-              href="#projects"
-              className="hover:text-cyan-400 transition-all duration-300 hover-target"
-            >
-              Projects
-            </a>
-            <a
-              href="#skills"
-              className="hover:text-cyan-400 transition-all duration-300 hover-target"
-            >
-              Skills
-            </a>
-            <a
-              href="#contact"
-              className="hover:text-cyan-400 transition-all duration-300 hover-target"
-            >
-              Contact
-            </a>
-          </nav>
-        </header>
-
-        {/* Hero Section */}
-        <section className="min-h-screen flex flex-col justify-center px-8 md:px-20 pt-20 relative">
-          <div
-            className="max-w-4xl"
-            style={{
-              transform: `translateY(${scrollY * 0.5}px)`,
-              opacity: Math.max(0, 1 - scrollY / 400),
-            }}
-          >
-            <div className="overflow-hidden mb-6">
+        <div className="flex items-center gap-8">
+          {/* Era progress */}
+          <div className="hidden md:flex items-center gap-2">
+            {ERAS.map((era, i) => (
               <div
-                className="inline-block px-4 py-2 text-sm font-semibold tracking-[0.3em] uppercase border border-cyan-400/30 rounded-full backdrop-blur-sm"
+                key={era.year}
+                className="w-8 h-0.5 rounded-full transition-all duration-300"
                 style={{
-                  animation: isLoaded
-                    ? "split-reveal 0.8s forwards 0.5s"
-                    : "none",
-                  opacity: isLoaded ? 1 : 0,
+                  backgroundColor:
+                    scrollProgress >= era.position ? era.color : "#333",
                 }}
-              >
-                Senior Software Engineer
-              </div>
-            </div>
-
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter mb-8 leading-[0.9]">
-              <span className="block overflow-hidden">
-                <span
-                  className="block"
-                  style={{
-                    transform: isLoaded ? "translateY(0)" : "translateY(100%)",
-                    transition:
-                      "transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s",
-                  }}
-                >
-                  Building
-                </span>
-              </span>
-              <span className="block overflow-hidden">
-                <span
-                  className="block gradient-text"
-                  style={{
-                    transform: isLoaded ? "translateY(0)" : "translateY(100%)",
-                    transition:
-                      "transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s",
-                  }}
-                >
-                  Digital
-                </span>
-              </span>
-              <span className="block overflow-hidden">
-                <span
-                  className="block"
-                  style={{
-                    transform: isLoaded ? "translateY(0)" : "translateY(100%)",
-                    transition:
-                      "transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.7s",
-                  }}
-                >
-                  Experiences
-                </span>
-              </span>
-            </h1>
-
-            <p
-              className="text-lg md:text-xl text-gray-400 max-w-xl mb-12 leading-relaxed"
-              style={{
-                opacity: isLoaded ? 1 : 0,
-                transform: isLoaded ? "translateY(0)" : "translateY(30px)",
-                transition: "all 1s cubic-bezier(0.16, 1, 0.3, 1) 1s",
-              }}
-            >
-              Crafting high-performance React &amp; Next.js applications.
-              <br />
-              <span className="text-cyan-400">3+ years</span> of solving complex
-              problems.
-            </p>
-
-            <div
-              className="flex flex-wrap gap-6"
-              style={{
-                opacity: isLoaded ? 1 : 0,
-                transform: isLoaded ? "translateY(0)" : "translateY(30px)",
-                transition: "all 1s cubic-bezier(0.16, 1, 0.3, 1) 1.2s",
-              }}
-            >
-              <a href="#contact" className="magnetic-btn hover-target">
-                Get in Touch
-                <ArrowUpRight className="w-4 h-4 ml-2" />
-              </a>
-              <a href="#projects" className="magnetic-btn hover-target">
-                View Work
-              </a>
-            </div>
+              />
+            ))}
           </div>
 
-          {/* Scroll indicator */}
-          <div
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-            style={{
-              opacity: isLoaded ? 1 : 0,
-              transition: "opacity 1s ease 1.5s",
-            }}
+          <a
+            href="#contact"
+            className="text-sm hover:text-cyan-400 transition-colors"
           >
-            <span className="text-xs tracking-[0.3em] uppercase text-gray-500">
-              Scroll
-            </span>
-            <div className="w-px h-16 bg-gradient-to-b from-cyan-400 to-transparent animate-pulse" />
-          </div>
-        </section>
+            Contact
+          </a>
+        </div>
+      </nav>
 
-        {/* Experience Section */}
-        <section id="experience" className="min-h-screen px-8 md:px-20 py-32">
-          <div
-            style={{
-              transform: `translateY(${Math.max(0, 80 - (scrollY - 400) * 0.15)}px)`,
-              opacity: Math.min(1, (scrollY - 300) / 300),
-            }}
-          >
-            <div className="flex items-center gap-4 mb-16">
-              <span className="text-cyan-400 text-sm tracking-[0.3em] uppercase">
-                01
-              </span>
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter">
-                Experience
-              </h2>
-            </div>
-
-            <div className="space-y-8 max-w-4xl">
-              <ExperienceCard
-                index="01"
-                company="Radiansys Technologies"
-                role="Senior Software Engineer"
-                period="Sept 2023 – Present"
-                description="Architected large-scale React and Next.js applications. Owned architecture-heavy features and solved performance-sensitive problems end-to-end. Led cross-functional collaboration with backend, design, and PM teams."
-                highlights={["Architecture", "Performance", "Leadership"]}
-              />
-              <ExperienceCard
-                index="02"
-                company="IJRDO Journal"
-                role="Software Engineer"
-                period="June 2022 – Sept 2023"
-                description="Built scalable React and Next.js applications with reusable component systems. Led technical direction for front-end features and mentored junior developers."
-                highlights={["React", "Next.js", "Mentorship"]}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Projects Section */}
-        <section id="projects" className="min-h-screen px-8 md:px-20 py-32">
-          <div
-            style={{
-              transform: `translateY(${Math.max(0, 80 - (scrollY - 1000) * 0.12)}px)`,
-              opacity: Math.min(1, (scrollY - 900) / 300),
-            }}
-          >
-            <div className="flex items-center gap-4 mb-16">
-              <span className="text-magenta-400 text-sm tracking-[0.3em] uppercase text-fuchsia-400">
-                02
-              </span>
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter">
-                Projects
-              </h2>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8 max-w-6xl">
-              <ProjectCard
-                title="VFXAI Video Editor"
-                description="Frame-accurate timeline, Fabric.js integration, CRDT + OT for real-time multiplayer editing similar to Figma's architecture."
-                tags={["React", "Fabric.js", "CRDT", "WebSocket"]}
-                number="01"
-              />
-              <ProjectCard
-                title="Simplr Chat"
-                description="Custom WebSocket client library with reconnection logic, message virtualization using windowing techniques for infinite scroll."
-                tags={["WebSocket", "Virtualization", "React"]}
-                number="02"
-              />
-              <ProjectCard
-                title="Gitsy PWA"
-                description="WebAuthn biometric authentication, offline-first with service workers, background sync, optimized mobile performance."
-                tags={["PWA", "WebAuthn", "Service Workers"]}
-                number="03"
-              />
-              <ProjectCard
-                title="Research Dashboard"
-                description="Production-grade Next.js dashboard for Scopus articles with SSR, advanced filtering, and modular state management."
-                tags={["Next.js", "SSR", "Dashboard"]}
-                number="04"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Skills Section */}
-        <section id="skills" className="min-h-screen px-8 md:px-20 py-32">
-          <div
-            style={{
-              transform: `translateY(${Math.max(0, 80 - (scrollY - 1800) * 0.12)}px)`,
-              opacity: Math.min(1, (scrollY - 1700) / 300),
-            }}
-          >
-            <div className="flex items-center gap-4 mb-16">
-              <span className="text-yellow-400 text-sm tracking-[0.3em] uppercase">
-                03
-              </span>
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter">
-                Skills
-              </h2>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl">
-              <SkillCard
-                title="Languages"
-                skills={["TypeScript", "JavaScript", "HTML5", "CSS3"]}
-                color="cyan"
-              />
-              <SkillCard
-                title="Frameworks"
-                skills={["React.js", "Next.js", "Express.js", "Node.js"]}
-                color="fuchsia"
-              />
-              <SkillCard
-                title="State & Tools"
-                skills={["Redux", "Zustand", "Firebase", "Jest", "Storybook"]}
-                color="yellow"
-              />
-            </div>
-
-            {/* Education */}
-            <div className="mt-24 max-w-2xl">
-              <h3 className="text-3xl font-bold mb-8">Education</h3>
-              <div className="hover-card p-8">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h4 className="text-2xl font-bold">
-                      B.Tech - Electrical Engineering
-                    </h4>
-                    <p className="text-cyan-400 mt-1">
-                      Deenbandhu Chhotu Ram University
-                    </p>
-                  </div>
-                  <span className="text-gray-500">2018 – 2022</span>
-                </div>
-                <p className="text-gray-400 text-sm">
-                  Relevant coursework: Data Structures, Algorithms, Computer
-                  Systems, Machine Learning, Databases.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Contact Section */}
-        <section
-          id="contact"
-          className="min-h-screen px-8 md:px-20 py-32 flex flex-col justify-center items-center text-center"
+      {/* Hero Section */}
+      <section className="min-h-screen flex items-center justify-center relative">
+        <div
+          className="text-center max-w-4xl px-8 pointer-events-auto"
+          style={{
+            transform: `translateY(${scrollProgress * 100}px)`,
+            opacity: Math.max(0, 1 - scrollProgress * 5),
+          }}
         >
-          <div
-            style={{
-              transform: `translateY(${Math.max(0, 50 - (scrollY - 2500) * 0.1)}px)`,
-              opacity: Math.min(1, (scrollY - 2400) / 300),
-            }}
-          >
-            <span className="text-cyan-400 text-sm tracking-[0.3em] uppercase mb-4 block">
-              04 / Contact
-            </span>
-            <h2 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter mb-8">
-              <span className="block">Let&apos;s Build</span>
-              <span className="block gradient-text">Something</span>
-              <span className="block">Amazing</span>
-            </h2>
-            <p className="text-xl text-gray-400 mb-12 max-w-xl">
-              Ready to create the next big thing together?
-            </p>
-
-            <a
-              href="mailto:suraj17054209@gmail.com"
-              className="group inline-flex items-center gap-4 text-2xl md:text-4xl font-bold hover:text-cyan-400 transition-colors hover-target"
+          <div className="overflow-hidden mb-6">
+            <div
+              className="inline-block px-4 py-2 text-xs font-semibold tracking-[0.4em] uppercase border border-white/20 rounded-full"
+              style={{
+                animation: "slideUp 0.8s ease forwards 0.3s",
+                opacity: 0,
+              }}
             >
-              suraj17054209@gmail.com
-              <ArrowUpRight className="w-8 h-8 group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform" />
-            </a>
-
-            <div className="flex justify-center gap-6 mt-16">
-              <SocialLink
-                href="https://github.com/surajkumar85"
-                icon={<Github className="w-6 h-6" />}
-                label="GitHub"
-              />
-              <SocialLink
-                href="https://linkedin.com"
-                icon={<Linkedin className="w-6 h-6" />}
-                label="LinkedIn"
-              />
-              <SocialLink
-                href="mailto:suraj17054209@gmail.com"
-                icon={<Mail className="w-6 h-6" />}
-                label="Email"
-              />
-              <SocialLink
-                href="tel:+919306385785"
-                icon={<Phone className="w-6 h-6" />}
-                label="Phone"
-              />
+              Scroll to travel through time
             </div>
-
-            <p className="text-gray-600 mt-24 text-sm tracking-wider uppercase">
-              © {new Date().getFullYear()} Suraj Kumar
-            </p>
           </div>
-        </section>
-      </div>
-    </>
-  );
-}
 
-function ExperienceCard({
-  index,
-  company,
-  role,
-  period,
-  description,
-  highlights,
-}: {
-  index: string;
-  company: string;
-  role: string;
-  period: string;
-  description: string;
-  highlights: string[];
-}) {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const cardRef = useRef<HTMLDivElement>(null);
+          <h1 className="text-7xl md:text-9xl font-bold tracking-tighter mb-6">
+            <span className="block overflow-hidden">
+              <span
+                className="block animate-slide-up"
+                style={{ animationDelay: "0.5s" }}
+              >
+                SURAJ
+              </span>
+            </span>
+            <span className="block overflow-hidden">
+              <span
+                className="block gradient-text animate-slide-up"
+                style={{ animationDelay: "0.7s" }}
+              >
+                KUMAR
+              </span>
+            </span>
+          </h1>
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    setMousePos({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
-    });
-  };
-
-  return (
-    <div
-      ref={cardRef}
-      className="hover-card p-8 md:p-10 hover-target"
-      onMouseMove={handleMouseMove}
-      style={
-        {
-          "--cursor-x": `${mousePos.x}%`,
-          "--cursor-y": `${mousePos.y}%`,
-        } as React.CSSProperties
-      }
-    >
-      <div className="flex items-start justify-between mb-6">
-        <span className="text-6xl font-bold text-white/5">{index}</span>
-        <span className="text-gray-500 text-sm">{period}</span>
-      </div>
-      <h3 className="text-3xl font-bold mb-2">{company}</h3>
-      <p className="text-cyan-400 mb-4">{role}</p>
-      <p className="text-gray-400 leading-relaxed mb-6">{description}</p>
-      <div className="flex flex-wrap gap-2">
-        {highlights.map((h) => (
-          <span
-            key={h}
-            className="px-3 py-1 text-xs uppercase tracking-wider border border-white/10 rounded-full"
+          <p
+            className="text-gray-400 text-lg md:text-xl max-w-xl mx-auto animate-fade-in"
+            style={{ animationDelay: "1s" }}
           >
-            {h}
+            Senior Software Engineer crafting digital experiences
+          </p>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
+          <div className="w-px h-20 bg-gradient-to-b from-white/50 to-transparent animate-pulse" />
+        </div>
+      </section>
+
+      {/* 2018 - The Beginning */}
+      <TimelineSection era={ERAS[0]} className="px-8 md:px-20">
+        <div className="max-w-2xl ml-20 md:ml-32 pointer-events-auto">
+          <span className="text-8xl font-bold opacity-10 absolute -top-10 left-20">
+            2018
           </span>
-        ))}
-      </div>
+          <h2 className="text-4xl md:text-6xl font-bold mb-6">The Beginning</h2>
+          <p className="text-gray-400 text-lg leading-relaxed mb-8">
+            Started my journey into software engineering. Learning the
+            fundamentals, building my first applications, and discovering the
+            power of web technologies.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {["HTML", "CSS", "JavaScript", "React"].map((skill) => (
+              <span
+                key={skill}
+                className="px-3 py-1 text-sm border border-white/20 rounded-full"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      </TimelineSection>
+
+      {/* 2022 - IJRDO */}
+      <TimelineSection era={ERAS[2]} className="px-8 md:px-20 items-end">
+        <div className="max-w-2xl mr-20 md:mr-32 text-right pointer-events-auto">
+          <span className="text-8xl font-bold opacity-10 absolute -top-10 right-20">
+            2022
+          </span>
+          <h2 className="text-4xl md:text-6xl font-bold mb-4">IJRDO Journal</h2>
+          <p className="text-cyan-400 text-xl mb-6">Software Engineer</p>
+          <p className="text-gray-400 text-lg leading-relaxed mb-8">
+            Architected React and Next.js applications with scalable structures.
+            Led technical direction for front-end features and mentored junior
+            developers.
+          </p>
+
+          <ProjectCard
+            title="Research Dashboard"
+            description="Production-grade Next.js dashboard for managing Scopus articles"
+            tags={["Next.js", "SSR", "Dashboard"]}
+          />
+        </div>
+      </TimelineSection>
+
+      {/* 2023-Present - Radiansys */}
+      <TimelineSection era={ERAS[3]} className="px-8 md:px-20">
+        <div className="max-w-3xl ml-20 md:ml-32 pointer-events-auto">
+          <span className="text-8xl font-bold opacity-10 absolute -top-10 left-20">
+            2023
+          </span>
+          <h2 className="text-4xl md:text-6xl font-bold mb-4">
+            Radiansys Technologies
+          </h2>
+          <p className="text-fuchsia-400 text-xl mb-6">
+            Senior Software Engineer
+          </p>
+          <p className="text-gray-400 text-lg leading-relaxed mb-8">
+            Owning architecture-heavy features across large-scale React and
+            Next.js applications. Solving performance-sensitive problems
+            end-to-end.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <ProjectCard
+              title="VFXAI Video Editor"
+              description="Frame-accurate timeline, Fabric.js integration, CRDT+OT collaboration"
+              tags={["React", "Fabric.js", "CRDT"]}
+              color="#ff00ff"
+            />
+            <ProjectCard
+              title="Simplr Chat"
+              description="Custom WebSocket client, message virtualization, real-time sync"
+              tags={["WebSocket", "React", "Virtualization"]}
+              color="#00ffff"
+            />
+            <ProjectCard
+              title="Gitsy PWA"
+              description="WebAuthn biometrics, offline-first, service workers"
+              tags={["PWA", "WebAuthn", "Service Workers"]}
+              color="#ffff00"
+            />
+          </div>
+        </div>
+      </TimelineSection>
+
+      {/* Present & Skills */}
+      <TimelineSection
+        era={ERAS[4]}
+        className="px-8 md:px-20 items-center justify-center"
+      >
+        <div className="max-w-4xl text-center pointer-events-auto">
+          <span className="text-8xl font-bold opacity-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            NOW
+          </span>
+          <h2 className="text-5xl md:text-7xl font-bold mb-12">Tech Stack</h2>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+            <SkillCategory
+              title="Core"
+              skills={["TypeScript", "React", "Next.js"]}
+              color="#00f0ff"
+            />
+            <SkillCategory
+              title="State"
+              skills={["Redux", "Zustand", "React Query"]}
+              color="#ff00ff"
+            />
+            <SkillCategory
+              title="Styling"
+              skills={["Tailwind", "CSS Modules", "Styled"]}
+              color="#ffff00"
+            />
+            <SkillCategory
+              title="Tools"
+              skills={["Firebase", "Jest", "Storybook"]}
+              color="#00ff88"
+            />
+          </div>
+
+          {/* Education */}
+          <div className="inline-block p-8 border border-white/10 rounded-2xl text-left">
+            <h3 className="text-2xl font-bold mb-2">
+              B.Tech - Electrical Engineering
+            </h3>
+            <p className="text-cyan-400">Deenbandhu Chhotu Ram University</p>
+            <p className="text-gray-500 text-sm">2018 – 2022</p>
+          </div>
+        </div>
+      </TimelineSection>
+
+      {/* Future - Contact */}
+      <TimelineSection
+        era={ERAS[5]}
+        className="px-8 md:px-20 items-center justify-center"
+        id="contact"
+      >
+        <div className="max-w-3xl text-center pointer-events-auto">
+          <span className="text-6xl md:text-8xl font-bold opacity-5 absolute top-1/4 left-1/2 -translate-x-1/2">
+            FUTURE
+          </span>
+
+          <h2 className="text-5xl md:text-8xl font-bold mb-8 tracking-tighter">
+            <span className="block">What&apos;s</span>
+            <span className="block gradient-text">Next?</span>
+          </h2>
+
+          <p className="text-xl text-gray-400 mb-12 max-w-xl mx-auto">
+            The future is unwritten. Let&apos;s build something amazing
+            together.
+          </p>
+
+          <a
+            href="mailto:suraj17054209@gmail.com"
+            className="group inline-flex items-center gap-4 text-2xl md:text-4xl font-bold hover:text-cyan-400 transition-colors hover-target"
+          >
+            suraj17054209@gmail.com
+            <ArrowUpRight className="w-8 h-8 group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform" />
+          </a>
+
+          <div className="flex justify-center gap-6 mt-16">
+            <SocialLink
+              href="https://github.com/surajkumar85"
+              icon={<Github />}
+            />
+            <SocialLink href="https://linkedin.com" icon={<Linkedin />} />
+            <SocialLink href="mailto:suraj17054209@gmail.com" icon={<Mail />} />
+            <SocialLink href="tel:+919306385785" icon={<Phone />} />
+          </div>
+
+          <p className="text-gray-700 mt-24 text-sm tracking-[0.2em] uppercase">
+            © {new Date().getFullYear()} Suraj Kumar
+          </p>
+        </div>
+      </TimelineSection>
+
+      {/* Spacer for scroll */}
+      <div className="h-screen" />
     </div>
   );
 }
@@ -524,53 +343,27 @@ function ProjectCard({
   title,
   description,
   tags,
-  number,
+  color = "#00f0ff",
 }: {
   title: string;
   description: string;
   tags: string[];
-  number: string;
+  color?: string;
 }) {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    setMousePos({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
-    });
-  };
-
   return (
     <div
-      ref={cardRef}
-      className="hover-card p-8 group hover-target"
-      onMouseMove={handleMouseMove}
-      style={
-        {
-          "--cursor-x": `${mousePos.x}%`,
-          "--cursor-y": `${mousePos.y}%`,
-        } as React.CSSProperties
-      }
+      className="group p-6 border border-white/10 rounded-xl hover:border-white/30 transition-all cursor-pointer hover-target"
+      style={{
+        background: `linear-gradient(135deg, ${color}10 0%, transparent 50%)`,
+      }}
     >
-      <div className="flex justify-between items-start mb-6">
-        <span className="text-5xl font-bold text-white/5">{number}</span>
-        <ExternalLink className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
-      </div>
-      <h3 className="text-2xl font-bold mb-4 group-hover:text-cyan-400 transition-colors">
+      <h3 className="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">
         {title}
       </h3>
-      <p className="text-gray-400 mb-6 text-sm leading-relaxed">
-        {description}
-      </p>
+      <p className="text-gray-400 text-sm mb-4">{description}</p>
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => (
-          <span
-            key={tag}
-            className="text-xs px-3 py-1 bg-white/5 rounded-full text-gray-300 border border-white/5"
-          >
+          <span key={tag} className="text-xs px-2 py-1 bg-white/5 rounded-md">
             {tag}
           </span>
         ))}
@@ -579,7 +372,7 @@ function ProjectCard({
   );
 }
 
-function SkillCard({
+function SkillCategory({
   title,
   skills,
   color,
@@ -588,51 +381,34 @@ function SkillCard({
   skills: string[];
   color: string;
 }) {
-  const colorClasses: Record<string, string> = {
-    cyan: "border-cyan-400/30 hover:border-cyan-400",
-    fuchsia: "border-fuchsia-400/30 hover:border-fuchsia-400",
-    yellow: "border-yellow-400/30 hover:border-yellow-400",
-  };
-
   return (
-    <div
-      className={`p-8 border rounded-2xl transition-colors ${colorClasses[color]}`}
-    >
-      <h3 className="text-xl font-bold mb-6">{title}</h3>
-      <div className="space-y-3">
+    <div className="text-left">
+      <h4
+        className="text-sm font-semibold mb-3 uppercase tracking-wider"
+        style={{ color }}
+      >
+        {title}
+      </h4>
+      <ul className="space-y-2">
         {skills.map((skill) => (
-          <div key={skill} className="flex items-center gap-3">
-            <div className={`w-2 h-2 rounded-full bg-${color}-400`} />
-            <span className="text-gray-300">{skill}</span>
-          </div>
+          <li key={skill} className="text-gray-300">
+            {skill}
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
 
-function SocialLink({
-  href,
-  icon,
-  label,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-}) {
+function SocialLink({ href, icon }: { href: string; icon: React.ReactNode }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-col items-center gap-2 hover-target"
+      className="p-4 border border-white/10 rounded-full hover:border-cyan-400 hover:bg-cyan-400/10 transition-all hover-target"
     >
-      <div className="p-4 border border-white/10 rounded-full hover:border-cyan-400 hover:bg-cyan-400/10 transition-all group-hover:scale-110">
-        {icon}
-      </div>
-      <span className="text-xs text-gray-500 group-hover:text-cyan-400 transition-colors">
-        {label}
-      </span>
+      {icon}
     </a>
   );
 }
